@@ -13,8 +13,22 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="/dashboard/host" element={<PrivateRoute requiredRole="host"><HostDashboard /></PrivateRoute>} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/host"
+            element={
+              <PrivateRoute requiredRole="host">
+                <HostDashboard />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

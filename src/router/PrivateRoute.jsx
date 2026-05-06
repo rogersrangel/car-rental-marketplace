@@ -5,11 +5,24 @@ export function PrivateRoute({ children, requiredRole }) {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Carregando...</div>;
+    // ✅ Retornando um JSX válido
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600">Carregando...</p>
+        </div>
+      </div>
+    );
   }
-  if (!user) return <Navigate to="/login" replace />;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   if (requiredRole && profile?.role !== requiredRole) {
     return <Navigate to="/" replace />;
   }
+
   return children;
 }

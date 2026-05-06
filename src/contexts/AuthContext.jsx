@@ -56,46 +56,46 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
- async function signIn(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    toast.error(error.message);
-  } else {
-    // Atualiza o estado local imediatamente
-    setUser(data.user);
-    const userProfile = await fetchProfile(data.user.id);
-    setProfile(userProfile);
-    toast.success(`Bem-vindo, ${data.user.email}`);
-  }
-  return { data, error };
-}
-
-async function signUp(email, password, fullName) {
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } }
-    });
+  async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
-      return { data: null, error };
+    } else {
+      setUser(data.user);
+      const userProfile = await fetchProfile(data.user.id);
+      setProfile(userProfile);
+      toast.success(`Bem-vindo, ${data.user.email}`);
     }
-    toast.success('Cadastro realizado! Verifique seu email.');
-    return { data, error: null };
-  } catch (err) {
-    toast.error('Erro inesperado no cadastro');
-    return { data: null, error: err };
+    return { data, error };
   }
-}
-  const signOut = async () => {
+
+  async function signUp(email, password, fullName) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } }
+      });
+      if (error) {
+        toast.error(error.message);
+        return { data: null, error };
+      }
+      toast.success('Cadastro realizado! Verifique seu email.');
+      return { data, error: null };
+    } catch (err) {
+      toast.error('Erro inesperado no cadastro');
+      return { data: null, error: err };
+    }
+  }
+
+  async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       toast.success('Logout realizado');
       setUser(null);
       setProfile(null);
     }
-  };
+  }
 
   const value = {
     user,
@@ -109,7 +109,12 @@ async function signUp(email, password, fullName) {
     isAdmin: profile?.role === 'admin',
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // ❗ CORREÇÃO AQUI: O retorno deve ser o Provider
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

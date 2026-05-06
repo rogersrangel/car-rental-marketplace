@@ -14,9 +14,13 @@ export function Home() {
             <h1 className="text-xl font-bold text-slate-800">CarRentalBR</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm">{profile?.full_name || user?.email} ({profile?.role})</span>
+            <span className="text-sm text-slate-600">
+              {profile?.full_name || user?.email} ({profile?.role})
+            </span>
             {profile?.role === 'host' && (
-              <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">Meus Veículos</Link>
+              <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
+                Meus Veículos
+              </Link>
             )}
             <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
               <LogOut className="w-4 h-4" /> Sair
