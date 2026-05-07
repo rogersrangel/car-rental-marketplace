@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePublicVehicles } from '../hooks/usePublicVehicles';
+import { useRealtimeBookings } from '../hooks/useRealtimeBookings';
 import { SearchFilters } from '../components/SearchFilters';
 import { VehicleCardPublic } from '../components/VehicleCardPublic';
 import { Search, Car, LogOut } from 'lucide-react';
@@ -22,6 +23,9 @@ export function Home() {
   });
   const [page] = useState(1);
   const { vehicles, total, loading } = usePublicVehicles(filters, page, 12);
+
+  // Notificações em tempo real para o usuário logado
+  useRealtimeBookings(user?.id);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -50,6 +54,11 @@ export function Home() {
                 Meus Veículos
               </Link>
             )}
+            {user && (
+              <Link to="/reservations" className="text-sm text-blue-600 hover:underline">
+                Minhas Reservas
+              </Link>
+            )}
             <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
               <LogOut className="w-4 h-4" /> Sair
             </button>
@@ -58,7 +67,7 @@ export function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
-        {/* Barra de busca e filtros */}
+        {/* Busca e filtros */}
         <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
           <form onSubmit={handleSearch} className="flex-1 max-w-md">
             <div className="relative">
@@ -75,7 +84,6 @@ export function Home() {
           <SearchFilters filters={filters} onApply={handleFilterApply} />
         </div>
 
-        {/* Resultados */}
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
