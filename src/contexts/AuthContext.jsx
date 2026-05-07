@@ -22,7 +22,6 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Obtém a role diretamente dos metadados do usuário
   const getUserRole = () => {
     return user?.user_metadata?.role || 'guest';
   };

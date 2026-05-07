@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { usePublicVehicles } from '../hooks/usePublicVehicles';
 
 export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
   const [vehicles, setVehicles] = useState([]);
@@ -12,7 +11,7 @@ export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
     setLoading(true);
     let query = supabase.from('vehicles').select('*', { count: 'exact' });
 
-    // Aplica filtros
+    // Filtros
     if (filters.search) {
       query = query.ilike('title', `%${filters.search}%`);
     }

@@ -53,6 +53,11 @@ export function SearchFilters({ filters, onApply }) {
     setIsOpen(false);
   };
 
+  // Verifica se há filtros ativos para mostrar o pontinho indicador
+  const hasActiveFilters = Object.keys(filters).some(
+    k => filters[k] && filters[k] !== 'all' && filters[k] !== '' && k !== 'orderBy' && k !== 'orderDir'
+  );
+
   return (
     <>
       <button
@@ -61,7 +66,7 @@ export function SearchFilters({ filters, onApply }) {
       >
         <SlidersHorizontal className="w-4 h-4" />
         Filtros
-        {Object.keys(filters).some(k => filters[k] && filters[k] !== 'all' && filters[k] !== '' && k !== 'orderBy' && k !== 'orderDir') && (
+        {hasActiveFilters && (
           <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
         )}
       </button>

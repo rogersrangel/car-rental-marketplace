@@ -7,23 +7,15 @@ import { Home } from './pages/Home';
 import { HostDashboard } from './pages/HostDashboard';
 import { VehicleDetail } from './pages/VehicleDetail';
 
-
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
-          <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/" element={<Home />} />
+          <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route
             path="/dashboard/host"
             element={

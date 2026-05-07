@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePublicVehicles } from '../hooks/usePublicVehicles';
+import { SearchFilters } from '../components/SearchFilters';
 import { VehicleCardPublic } from '../components/VehicleCardPublic';
 import { Search, Car, LogOut } from 'lucide-react';
 
