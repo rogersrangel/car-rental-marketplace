@@ -23,44 +23,43 @@ export function useBookings() {
 
   const fetchUserBookings = useCallback(async (userId, role = 'guest') => {
     setLoading(true);
-    const field = role === 'guest' ? 'guest_id' : 'host_id';
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq(field, userId)
-      .order('created_at', { ascending: false });
+    try {
+      const field = role === 'guest' ? 'guest_id' : 'host_id';
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq(field, userId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      toast.error(error.message);
+      if (error) throw error;
+
+      const bookingsWithVehicles = await Promise.all(
+        data.map(async (booking) => {
+          const { data: vehicle } = await supabase
+            .from('vehicles')
+            .select('*')
+            .eq('id', booking.vehicle_id)
+            .single();
+          const { data: hostProfile } = await supabase
+            .from('profiles')
+            .select('pix_key')
+            .eq('id', booking.host_id)
+            .single();
+          return {
+            ...booking,
+            vehicles: vehicle,
+            host_pix_key: hostProfile?.pix_key || '',
+          };
+        })
+      );
+      setLoading(false);
+      return bookingsWithVehicles;
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao carregar reservas');
       setLoading(false);
       return [];
     }
-
-    // Buscar veículos e também a chave Pix do host
-    const bookingsWithDetails = await Promise.all(
-      data.map(async (booking) => {
-        const { data: vehicle } = await supabase
-          .from('vehicles')
-          .select('*')
-          .eq('id', booking.vehicle_id)
-          .single();
-
-        const { data: hostProfile } = await supabase
-          .from('profiles')
-          .select('pix_key')
-          .eq('id', booking.host_id)
-          .single();
-
-        return {
-          ...booking,
-          vehicles: vehicle,
-          host_pix_key: hostProfile?.pix_key || '',
-        };
-      })
-    );
-
-    setLoading(false);
-    return bookingsWithDetails;
   }, []);
 
   const updateBookingStatus = useCallback(async (bookingId, status) => {

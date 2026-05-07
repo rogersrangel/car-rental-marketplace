@@ -10,62 +10,65 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   async function fetchProfile(userId) {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    if (error) {
-      console.error('Erro ao buscar perfil:', error);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      if (error) {
+        console.error('Erro no fetchProfile:', error);
+        return null;
+      }
+      return data;
+    } catch (err) {
+      console.error('Exceção no fetchProfile:', err);
       return null;
     }
-    return data;
   }
 
   useEffect(() => {
+    let isMounted = true;
+
     const initialize = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const prof = await fetchProfile(currentUser.id);
-        setProfile(prof);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
+          const prof = await fetchProfile(currentUser.id);
+          if (isMounted) setProfile(prof);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar sessão:', err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
     };
+
     initialize();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
         const prof = await fetchProfile(currentUser.id);
-        setProfile(prof);
+        if (isMounted) setProfile(prof);
       } else {
-        setProfile(null);
+        if (isMounted) setProfile(null);
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const getUserRole = () => profile?.role || 'guest';
-
-  async function updatePixKey(newPixKey) {
-    if (!profile) return false;
-    const { error } = await supabase
-      .from('profiles')
-      .update({ pix_key: newPixKey })
-      .eq('id', profile.id);
-    if (error) {
-      toast.error(error.message);
-      return false;
-    }
-    setProfile({ ...profile, pix_key: newPixKey });
-    toast.success('Chave Pix atualizada');
-    return true;
-  }
 
   async function signIn(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -113,7 +116,6 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
-    updatePixKey,
     getUserRole,
     isGuest: getUserRole() === 'guest',
     isHost: getUserRole() === 'host',
