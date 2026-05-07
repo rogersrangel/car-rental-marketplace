@@ -1,17 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useVehicles } from '../hooks/useVehicles';
+import { useBookings } from '../hooks/useBookings';
 import { VehicleCard } from '../components/VehicleCard';
 import { VehicleForm } from '../components/VehicleForm';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ArrowLeft, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function HostDashboard() {
   const { user } = useAuth();
   const { vehicles, loading, createVehicle, updateVehicle, deleteVehicle } = useVehicles(user?.id);
+  const { fetchUserBookings } = useBookings();
   const [showForm, setShowForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
+  const [earnings, setEarnings] = useState(0);
+  const [completedBookings, setCompletedBookings] = useState(0);
+  const [occupancyRate, setOccupancyRate] = useState(0);
+
+  useEffect(() => {
+    if (user && vehicles.length > 0) {
+      fetchUserBookings(user.id, 'host').then(bookings => {
+        const completed = bookings.filter(b => b.status === 'completed');
+        const totalEarned = completed.reduce((sum, b) => sum + b.total_price, 0);
+        setCompletedBookings(completed.length);
+        setEarnings(totalEarned);
+
+        // Taxa de ocupação simplificada (dias reservados / dias totais no mês)
+        const totalDays = vehicles.reduce((sum, v) => sum + 30, 0); // 30 dias por veículo
+        const bookedDays = bookings.reduce((sum, b) => {
+          const days = Math.ceil((new Date(b.end_date) - new Date(b.start_date)) / (1000 * 60 * 60 * 24));
+          return sum + days;
+        }, 0);
+        setOccupancyRate(totalDays ? (bookedDays / totalDays) * 100 : 0);
+      });
+    }
+  }, [user, vehicles, fetchUserBookings]);
 
   const handleEdit = (vehicle) => {
     setEditingVehicle(vehicle);
@@ -68,6 +92,31 @@ export function HostDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
+        {/* Cards financeiros */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-xl shadow p-4 flex items-center gap-3">
+            <DollarSign className="w-8 h-8 text-green-600" />
+            <div>
+              <p className="text-sm text-slate-500">Ganhos totais</p>
+              <p className="text-xl font-bold">R$ {earnings.toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 flex items-center gap-3">
+            <Calendar className="w-8 h-8 text-blue-600" />
+            <div>
+              <p className="text-sm text-slate-500">Reservas concluídas</p>
+              <p className="text-xl font-bold">{completedBookings}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 flex items-center gap-3">
+            <TrendingUp className="w-8 h-8 text-purple-600" />
+            <div>
+              <p className="text-sm text-slate-500">Taxa de ocupação</p>
+              <p className="text-xl font-bold">{occupancyRate.toFixed(1)}%</p>
+            </div>
+          </div>
+        </div>
+
         {vehicles.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}

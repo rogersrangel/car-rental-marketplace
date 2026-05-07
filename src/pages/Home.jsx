@@ -5,7 +5,7 @@ import { usePublicVehicles } from '../hooks/usePublicVehicles';
 import { useRealtimeBookings } from '../hooks/useRealtimeBookings';
 import { SearchFilters } from '../components/SearchFilters';
 import { VehicleCardPublic } from '../components/VehicleCardPublic';
-import { Search, Car, LogOut } from 'lucide-react';
+import { Search, Car, LogOut, LogIn } from 'lucide-react';
 
 export function Home() {
   const { user, signOut, getUserRole } = useAuth();
@@ -24,7 +24,6 @@ export function Home() {
   const [page] = useState(1);
   const { vehicles, total, loading } = usePublicVehicles(filters, page, 12);
 
-  // Notificações em tempo real para o usuário logado
   useRealtimeBookings(user?.id);
 
   const handleSearch = (e) => {
@@ -46,28 +45,38 @@ export function Home() {
             <h1 className="text-xl font-bold text-slate-800">CarRentalBR</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">
-              {user?.user_metadata?.full_name || user?.email} ({getUserRole()})
-            </span>
-            {getUserRole() === 'host' && (
-              <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
-                Meus Veículos
+            {user ? (
+              <>
+                <span className="text-sm text-slate-600">
+                  {user?.user_metadata?.full_name || user?.email} ({getUserRole()})
+                </span>
+                {getUserRole() === 'host' && (
+                  <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
+                    Meus Veículos
+                  </Link>
+                )}
+                {getUserRole() === 'admin' && (
+                  <Link to="/admin" className="text-sm text-purple-600 hover:underline">
+                    Admin
+                  </Link>
+                )}
+                <Link to="/reservations" className="text-sm text-blue-600 hover:underline">
+                  Minhas Reservas
+                </Link>
+                <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
+                  <LogOut className="w-4 h-4" /> Sair
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium">
+                <LogIn className="w-4 h-4" /> Entrar
               </Link>
             )}
-            {user && (
-              <Link to="/reservations" className="text-sm text-blue-600 hover:underline">
-                Minhas Reservas
-              </Link>
-            )}
-            <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
-              <LogOut className="w-4 h-4" /> Sair
-            </button>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
-        {/* Busca e filtros */}
         <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
           <form onSubmit={handleSearch} className="flex-1 max-w-md">
             <div className="relative">

@@ -7,6 +7,7 @@ import { Home } from './pages/Home';
 import { HostDashboard } from './pages/HostDashboard';
 import { VehicleDetail } from './pages/VehicleDetail';
 import { MyReservations } from './pages/MyReservations';
+import { AdminDashboard } from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -18,15 +19,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/reservations" element={<PrivateRoute><MyReservations /></PrivateRoute>} />
-
-          <Route
-            path="/dashboard/host"
-            element={
-              <PrivateRoute requiredRole="host">
-                <HostDashboard />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/dashboard/host" element={<PrivateRoute requiredRole="host"><HostDashboard /></PrivateRoute>} />
+          <Route path="/admin" element={<PrivateRoute requiredRole="admin"><AdminDashboard /></PrivateRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
