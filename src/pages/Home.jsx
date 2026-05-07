@@ -1,14 +1,41 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Car, LogOut } from 'lucide-react';
+import { usePublicVehicles } from '../hooks/usePublicVehicles';
+import { VehicleCardPublic } from '../components/VehicleCardPublic';
+import { Search, Car, LogOut } from 'lucide-react';
 
 export function Home() {
   const { user, signOut, getUserRole } = useAuth();
+  const [filters, setFilters] = useState({
+    search: '',
+    category: 'all',
+    city: '',
+    fuel_type: 'all',
+    transmission: 'all',
+    min_price: '',
+    max_price: '',
+    seats: '',
+    orderBy: 'created_at',
+    orderDir: 'desc',
+  });
+  const [page] = useState(1);
+  const { vehicles, total, loading } = usePublicVehicles(filters, page, 12);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    setFilters(prev => ({ ...prev, search: formData.get('search') || '' }));
+  };
+
+  const handleFilterApply = (newFilters) => {
+    setFilters(newFilters);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <header className="bg-white border-b border-slate-200 p-4 sticky top-0 z-20 shadow-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <Car className="w-6 h-6 text-blue-600" />
             <h1 className="text-xl font-bold text-slate-800">CarRentalBR</h1>
@@ -18,32 +45,75 @@ export function Home() {
               {user?.user_metadata?.full_name || user?.email} ({getUserRole()})
             </span>
             {getUserRole() === 'host' && (
-              <Link 
-                to="/dashboard/host" 
-                className="text-sm text-blue-600 hover:underline"
-              >
+              <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
                 Meus Veículos
               </Link>
             )}
-            <button 
-              onClick={signOut} 
-              className="flex items-center gap-1 text-red-600 hover:text-red-700"
-            >
+            <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
               <LogOut className="w-4 h-4" /> Sair
             </button>
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto p-4 text-center py-12">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Bem-vindo ao CarRentalBR</h2>
-        <p className="text-slate-600">
-          Marketplace peer‑to‑peer para aluguel de carros e motos.
-        </p>
-        <p className="text-sm text-slate-500 mt-4">
-          {getUserRole() === 'host' 
-            ? 'Você é um anfitrião. Gerencie seus veículos no menu acima.'
-            : 'Você é um hóspede. Em breve poderá pesquisar e reservar veículos.'}
-        </p>
+
+      <main className="max-w-7xl mx-auto p-4">
+        {/* Barra de busca e filtros */}
+        <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
+          <form onSubmit={handleSearch} className="flex-1 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                name="search"
+                defaultValue={filters.search}
+                placeholder="Buscar veículos por nome..."
+                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </form>
+          <SearchFilters filters={filters} onApply={handleFilterApply} />
+        </div>
+
+        {/* Resultados */}
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-4 text-slate-600">
+              {total} veículo{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+            </div>
+            {vehicles.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+                <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
+                <button
+                  onClick={() => handleFilterApply({
+                    search: '',
+                    category: 'all',
+                    city: '',
+                    fuel_type: 'all',
+                    transmission: 'all',
+                    min_price: '',
+                    max_price: '',
+                    seats: '',
+                    orderBy: 'created_at',
+                    orderDir: 'desc',
+                  })}
+                  className="mt-3 text-blue-600 hover:underline"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {vehicles.map(vehicle => (
+                  <VehicleCardPublic key={vehicle.id} vehicle={vehicle} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

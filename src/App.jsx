@@ -5,6 +5,8 @@ import { PrivateRoute } from './router/PrivateRoute';
 import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { HostDashboard } from './pages/HostDashboard';
+import { VehicleDetail } from './pages/VehicleDetail';
+
 
 function App() {
   return (
@@ -12,6 +14,7 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
+          <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/login" element={<Login />} />
           <Route
             path="/"
