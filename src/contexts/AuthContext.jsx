@@ -28,22 +28,30 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const prof = await fetchProfile(currentUser.id);
-        setProfile(prof);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        if (currentUser) {
+          const prof = await fetchProfile(currentUser.id);
+          setProfile(prof);
+        }
+      } catch (error) {
+        console.error('Erro na inicialização da autenticação:', error);
+        toast.error('Erro ao conectar com o servidor');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    getSession();
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      
       if (currentUser) {
         const prof = await fetchProfile(currentUser.id);
         setProfile(prof);
@@ -57,16 +65,22 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    } else {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
+        return { data: null, error };
+      }
+      
       setUser(data.user);
       const userProfile = await fetchProfile(data.user.id);
       setProfile(userProfile);
       toast.success(`Bem-vindo, ${data.user.email}`);
+      return { data, error: null };
+    } catch (err) {
+      toast.error('Erro inesperado no login');
+      return { data: null, error: err };
     }
-    return { data, error };
   }
 
   async function signUp(email, password, fullName) {
@@ -109,16 +123,13 @@ export function AuthProvider({ children }) {
     isAdmin: profile?.role === 'admin',
   };
 
-  // ❗ CORREÇÃO AQUI: O retorno deve ser o Provider
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 }

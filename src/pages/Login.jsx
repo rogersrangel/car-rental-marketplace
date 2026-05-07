@@ -27,7 +27,6 @@ export function Login() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // Redireciona quando o usuário fica disponível (login bem-sucedido)
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -49,6 +48,7 @@ export function Login() {
       setErrors(fieldErrors);
       return;
     }
+    
     setLoading(true);
     try {
       if (isRegister) {
@@ -60,7 +60,7 @@ export function Login() {
         }
       } else {
         await signIn(form.email, form.password);
-        // O redirecionamento será feito pelo useEffect acima
+        // O redirecionamento será feito pelo useEffect
       }
     } catch (err) {
       console.error(err);
@@ -117,7 +117,7 @@ export function Login() {
               {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
           )}
-          <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+          <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50">
             {loading ? 'Aguarde...' : (isRegister ? 'Cadastrar' : 'Entrar')}
           </button>
         </form>
