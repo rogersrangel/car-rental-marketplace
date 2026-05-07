@@ -26,8 +26,8 @@ export function HostDashboard() {
         setCompletedBookings(completed.length);
         setEarnings(totalEarned);
 
-        // Taxa de ocupação simplificada (dias reservados / dias totais no mês)
-        const totalDays = vehicles.reduce((sum, v) => sum + 30, 0); // 30 dias por veículo
+        // Cálculo simplificado (30 dias por veículo)
+        const totalDays = vehicles.reduce((sum, v) => sum + 30, 0);
         const bookedDays = bookings.reduce((sum, b) => {
           const days = Math.ceil((new Date(b.end_date) - new Date(b.start_date)) / (1000 * 60 * 60 * 24));
           return sum + days;
@@ -79,15 +79,20 @@ export function HostDashboard() {
             </Link>
             <h1 className="text-xl font-bold text-slate-800">Meus Veículos</h1>
           </div>
-          <button
-            onClick={() => {
-              setEditingVehicle(null);
-              setShowForm(true);
-            }}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Adicionar Veículo
-          </button>
+          <div className="flex items-center gap-4">
+            <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">
+              Perfil
+            </Link>
+            <button
+              onClick={() => {
+                setEditingVehicle(null);
+                setShowForm(true);
+              }}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Adicionar Veículo
+            </button>
+          </div>
         </div>
       </header>
 

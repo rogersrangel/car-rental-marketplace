@@ -13,6 +13,7 @@ export function useBookings() {
       .select();
     if (error) {
       toast.error(error.message);
+      setLoading(false);
       return null;
     }
     toast.success('Solicitação de reserva enviada!');
@@ -20,35 +21,47 @@ export function useBookings() {
     return data[0];
   }, []);
 
- const fetchUserBookings = useCallback(async (userId, role = 'guest') => {
-  setLoading(true);
-  const field = role === 'guest' ? 'guest_id' : 'host_id';
-  const { data, error } = await supabase
-    .from('bookings')
-    .select('*')
-    .eq(field, userId)
-    .order('created_at', { ascending: false });
-  
-  if (error) {
-    toast.error(error.message);
-    return [];
-  }
+  const fetchUserBookings = useCallback(async (userId, role = 'guest') => {
+    setLoading(true);
+    const field = role === 'guest' ? 'guest_id' : 'host_id';
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq(field, userId)
+      .order('created_at', { ascending: false });
 
-  // Buscar os veículos separadamente
-  const bookingsWithVehicles = await Promise.all(
-    data.map(async (booking) => {
-      const { data: vehicle } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('id', booking.vehicle_id)
-        .single();
-      return { ...booking, vehicles: vehicle };
-    })
-  );
-  
-  setLoading(false);
-  return bookingsWithVehicles;
-}, []);
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return [];
+    }
+
+    // Buscar veículos e também a chave Pix do host
+    const bookingsWithDetails = await Promise.all(
+      data.map(async (booking) => {
+        const { data: vehicle } = await supabase
+          .from('vehicles')
+          .select('*')
+          .eq('id', booking.vehicle_id)
+          .single();
+
+        const { data: hostProfile } = await supabase
+          .from('profiles')
+          .select('pix_key')
+          .eq('id', booking.host_id)
+          .single();
+
+        return {
+          ...booking,
+          vehicles: vehicle,
+          host_pix_key: hostProfile?.pix_key || '',
+        };
+      })
+    );
+
+    setLoading(false);
+    return bookingsWithDetails;
+  }, []);
 
   const updateBookingStatus = useCallback(async (bookingId, status) => {
     setLoading(true);
@@ -58,6 +71,7 @@ export function useBookings() {
       .eq('id', bookingId);
     if (error) {
       toast.error(error.message);
+      setLoading(false);
       return false;
     }
     toast.success(`Status alterado para ${status}`);
@@ -70,10 +84,19 @@ export function useBookings() {
       .from('bookings')
       .update({ contract_pdf_url: pdfUrl })
       .eq('id', bookingId);
-    if (error) toast.error(error.message);
-    else toast.success('Contrato anexado!');
-    return !error;
+    if (error) {
+      toast.error('Erro ao anexar contrato');
+      return false;
+    }
+    toast.success('Contrato anexado à reserva');
+    return true;
   }, []);
 
-  return { createBooking, fetchUserBookings, updateBookingStatus, uploadContract, loading };
+  return {
+    createBooking,
+    fetchUserBookings,
+    updateBookingStatus,
+    uploadContract,
+    loading,
+  };
 }

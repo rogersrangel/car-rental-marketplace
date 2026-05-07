@@ -8,6 +8,7 @@ import { HostDashboard } from './pages/HostDashboard';
 import { VehicleDetail } from './pages/VehicleDetail';
 import { MyReservations } from './pages/MyReservations';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { Profile } from './pages/Profile';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/reservations" element={<PrivateRoute><MyReservations /></PrivateRoute>} />
           <Route path="/dashboard/host" element={<PrivateRoute requiredRole="host"><HostDashboard /></PrivateRoute>} />
           <Route path="/admin" element={<PrivateRoute requiredRole="admin"><AdminDashboard /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

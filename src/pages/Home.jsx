@@ -24,6 +24,7 @@ export function Home() {
   const [page] = useState(1);
   const { vehicles, total, loading } = usePublicVehicles(filters, page, 12);
 
+  // Notificações em tempo real para o usuário logado
   useRealtimeBookings(user?.id);
 
   const handleSearch = (e) => {
@@ -50,6 +51,9 @@ export function Home() {
                 <span className="text-sm text-slate-600">
                   {user?.user_metadata?.full_name || user?.email} ({getUserRole()})
                 </span>
+                <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">
+                  Perfil
+                </Link>
                 {getUserRole() === 'host' && (
                   <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
                     Meus Veículos
@@ -77,6 +81,7 @@ export function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
+        {/* Barra de busca e filtros */}
         <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
           <form onSubmit={handleSearch} className="flex-1 max-w-md">
             <div className="relative">

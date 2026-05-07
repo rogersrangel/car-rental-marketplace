@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBookings } from '../hooks/useBookings';
 import { useRealtimeBookings } from '../hooks/useRealtimeBookings';
 import { RatingModal } from '../components/RatingModal';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, Download } from 'lucide-react';
 
 export function MyReservations() {
   const { user } = useAuth();
@@ -38,6 +38,17 @@ export function MyReservations() {
   const handleRated = async () => {
     const updated = await fetchUserBookings(user.id, role);
     setBookings(updated);
+  };
+
+  const viewContract = (url) => {
+    window.open(url, '_blank');
+  };
+
+  const downloadContract = (url, title) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contrato_${title.replace(/\s/g, '_')}.pdf`;
+    link.click();
   };
 
   return (
@@ -90,19 +101,38 @@ export function MyReservations() {
                 )}
               </div>
 
+              {/* Contrato PDF */}
               {booking.contract_pdf_url && (
-                <div className="mt-3">
-                  <a
-                    href={booking.contract_pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 text-sm hover:underline"
+                <div className="mt-3 flex gap-3">
+                  <button
+                    onClick={() => viewContract(booking.contract_pdf_url)}
+                    className="flex items-center gap-1 text-blue-600 text-sm hover:underline"
                   >
-                    Ver contrato
-                  </a>
+                    <Eye className="w-4 h-4" /> Visualizar contrato
+                  </button>
+                  <button
+                    onClick={() => downloadContract(booking.contract_pdf_url, booking.vehicles?.title || 'reserva')}
+                    className="flex items-center gap-1 text-green-600 text-sm hover:underline"
+                  >
+                    <Download className="w-4 h-4" /> Baixar PDF
+                  </button>
                 </div>
               )}
 
+              {/* Exibição da chave Pix se reserva aprovada */}
+              {booking.status === 'approved' && (
+                <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm font-semibold text-green-800">Pagamento via Pix</p>
+                  <p className="text-sm text-green-700">
+                    Chave Pix do anfitrião: <strong>{booking.host_pix_key || 'Não informada'}</strong>
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    Após o pagamento, o anfitrião deverá confirmar para ativar a reserva.
+                  </p>
+                </div>
+              )}
+
+              {/* Botão avaliar (se concluída) */}
               {booking.status === 'completed' && (
                 <div className="mt-3">
                   <button

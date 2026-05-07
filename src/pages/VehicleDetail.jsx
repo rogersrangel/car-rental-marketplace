@@ -21,10 +21,15 @@ export function VehicleDetail() {
   const [showContract, setShowContract] = useState(false);
   const [checklistUrls, setChecklistUrls] = useState([]);
   const [proofUrl, setProofUrl] = useState('');
+  const [tempBookingId, setTempBookingId] = useState(null);
 
   useEffect(() => {
     const fetchVehicle = async () => {
-      const { data, error } = await supabase.from('vehicles').select('*').eq('id', id).single();
+      const { data, error } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('id', id)
+        .single();
       if (!error) setVehicle(data);
       setLoading(false);
     };
@@ -32,7 +37,7 @@ export function VehicleDetail() {
   }, [id]);
 
   const calculateTotal = () => {
-    if (startDateTime && endDateTime) {
+    if (startDateTime && endDateTime && vehicle) {
       const start = new Date(startDateTime);
       const end = new Date(endDateTime);
       if (end > start) {
@@ -85,46 +90,91 @@ export function VehicleDetail() {
 
     const booking = await createBooking(bookingData);
     if (booking) {
+      setTempBookingId(booking.id);
       setShowContract(true);
-      window.tempBookingId = booking.id;
     }
   };
 
   const handleContractSave = async (pdfDataUrl) => {
-    const fileName = `contract-${Date.now()}.pdf`;
-    const { error } = await supabase.storage.from('vehicles').upload(fileName, pdfDataUrl);
-    if (error) {
-      toast.error('Erro ao salvar contrato');
-      return;
+    if (!tempBookingId) return;
+
+    try {
+      // Converte data URL para Blob
+      const blob = await fetch(pdfDataUrl).then(res => res.blob());
+      const fileName = `contract-${Date.now()}.pdf`;
+      
+      // Upload para o bucket 'vehicles'
+      const { error: uploadError } = await supabase.storage
+        .from('vehicles')
+        .upload(fileName, blob);
+      
+      if (uploadError) {
+        toast.error('Erro ao salvar contrato no servidor');
+        console.error(uploadError);
+        return;
+      }
+      
+      // Obtém URL pública do arquivo
+      const { data: { publicUrl } } = supabase.storage
+        .from('vehicles')
+        .getPublicUrl(fileName);
+      
+      // Atualiza a reserva com a URL do contrato
+      await uploadContract(tempBookingId, publicUrl);
+      toast.success('Reserva concluída!');
+      setShowContract(false);
+    } catch (err) {
+      toast.error('Erro inesperado ao processar contrato');
+      console.error(err);
     }
-    const { data } = supabase.storage.from('vehicles').getPublicUrl(fileName);
-    await uploadContract(window.tempBookingId, data.publicUrl);
-    toast.success('Reserva concluída!');
   };
 
   if (loading) return <div className="p-8 text-center">Carregando...</div>;
   if (!vehicle) return <div className="p-8 text-center">Veículo não encontrado.</div>;
 
   const getFuelText = (fuel) => ({
-    gasoline: 'Gasolina', ethanol: 'Etanol', diesel: 'Diesel', electric: 'Elétrico'
+    gasoline: 'Gasolina',
+    ethanol: 'Etanol',
+    diesel: 'Diesel',
+    electric: 'Elétrico',
   }[fuel] || fuel);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4">
       <div className="max-w-6xl mx-auto">
-        <Link to="/" className="inline-flex items-center gap-2 text-slate-600 mb-4"><ArrowLeft className="w-4 h-4" /> Voltar</Link>
+        <Link to="/" className="inline-flex items-center gap-2 text-slate-600 mb-4">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </Link>
         <div className="grid md:grid-cols-2 gap-6">
           {/* Imagem e detalhes */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            {vehicle.images?.[0] && <img src={vehicle.images[0]} alt={vehicle.title} className="w-full h-96 object-cover" />}
+            {vehicle.images?.[0] && (
+              <img
+                src={vehicle.images[0]}
+                alt={vehicle.title}
+                className="w-full h-96 object-cover"
+              />
+            )}
             <div className="p-6">
               <h1 className="text-2xl font-bold">{vehicle.title}</h1>
               <p className="text-slate-600 mt-2">{vehicle.description}</p>
               <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="flex gap-2"><Car className="w-5 h-5" /> {vehicle.category === 'car' ? 'Carro' : 'Moto'}</div>
-                <div className="flex gap-2"><Fuel className="w-5 h-5" /> {getFuelText(vehicle.fuel_type)}</div>
-                <div className="flex gap-2"><Gauge className="w-5 h-5" /> {vehicle.transmission === 'automatic' ? 'Automático' : 'Manual'}</div>
-                <div className="flex gap-2"><MapPin className="w-5 h-5" /> {vehicle.location_city}/{vehicle.location_state}</div>
+                <div className="flex gap-2">
+                  <Car className="w-5 h-5" />
+                  {vehicle.category === 'car' ? 'Carro' : 'Moto'}
+                </div>
+                <div className="flex gap-2">
+                  <Fuel className="w-5 h-5" />
+                  {getFuelText(vehicle.fuel_type)}
+                </div>
+                <div className="flex gap-2">
+                  <Gauge className="w-5 h-5" />
+                  {vehicle.transmission === 'automatic' ? 'Automático' : 'Manual'}
+                </div>
+                <div className="flex gap-2">
+                  <MapPin className="w-5 h-5" />
+                  {vehicle.location_city}/{vehicle.location_state}
+                </div>
               </div>
             </div>
           </div>
@@ -135,11 +185,21 @@ export function VehicleDetail() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium">Data/hora de retirada</label>
-                <input type="datetime-local" value={startDateTime} onChange={e => setStartDateTime(e.target.value)} className="w-full border rounded-lg p-2" />
+                <input
+                  type="datetime-local"
+                  value={startDateTime}
+                  onChange={e => setStartDateTime(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium">Data/hora de devolução</label>
-                <input type="datetime-local" value={endDateTime} onChange={e => setEndDateTime(e.target.value)} className="w-full border rounded-lg p-2" />
+                <input
+                  type="datetime-local"
+                  value={endDateTime}
+                  onChange={e => setEndDateTime(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                />
               </div>
               {totalPrice > 0 && (
                 <div className="bg-blue-50 p-3 rounded-lg">
@@ -147,9 +207,17 @@ export function VehicleDetail() {
                   <p className="text-sm">Diária: R$ {vehicle.price_per_day}</p>
                 </div>
               )}
-              <ChecklistUpload onUploadComplete={setChecklistUrls} label="Fotos do estado atual do veículo (opcional)" />
+              <ChecklistUpload
+                onUploadComplete={setChecklistUrls}
+                label="Fotos do estado atual do veículo (opcional)"
+              />
               <PaymentProofUpload onUpload={setProofUrl} />
-              <button onClick={handleBooking} className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold">Solicitar Reserva</button>
+              <button
+                onClick={handleBooking}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+              >
+                Solicitar Reserva
+              </button>
             </div>
           </div>
         </div>
