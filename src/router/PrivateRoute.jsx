@@ -2,26 +2,12 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export function PrivateRoute({ children, requiredRole }) {
-  const { user, profile, loading } = useAuth();
+  const { user, loading, getUserRole } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-slate-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (requiredRole && profile?.role !== requiredRole) {
+  if (loading) return <div className="p-8 text-center">Carregando...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (requiredRole && getUserRole() !== requiredRole) {
     return <Navigate to="/" replace />;
   }
-
   return children;
 }

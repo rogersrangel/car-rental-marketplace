@@ -28,9 +28,7 @@ export function Login() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
+    if (user) navigate('/');
   }, [user, navigate]);
 
   const handleChange = (e) => {
@@ -48,28 +46,21 @@ export function Login() {
       setErrors(fieldErrors);
       return;
     }
-    
     setLoading(true);
-    try {
-      if (isRegister) {
-        const { error } = await signUp(form.email, form.password, form.fullName);
-        if (!error) {
-          toast.success('Cadastro realizado! Agora faça login.');
-          setIsRegister(false);
-          setForm({ ...form, password: '', confirmPassword: '' });
-        }
-      } else {
-        await signIn(form.email, form.password);
-        // O redirecionamento será feito pelo useEffect
+    if (isRegister) {
+      const { error } = await signUp(form.email, form.password, form.fullName);
+      if (!error) {
+        toast.success('Cadastro realizado! Agora faça login.');
+        setIsRegister(false);
+        setForm({ ...form, password: '', confirmPassword: '' });
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro inesperado. Tente novamente.');
-    } finally {
-      setLoading(false);
+    } else {
+      await signIn(form.email, form.password);
     }
+    setLoading(false);
   };
 
+  // (o JSX permanece o mesmo, sem alterações)
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <motion.div
