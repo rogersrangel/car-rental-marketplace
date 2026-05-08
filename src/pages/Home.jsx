@@ -22,9 +22,8 @@ export function Home() {
     orderDir: 'desc',
   });
   const [page] = useState(1);
-  const { vehicles, total, loading } = usePublicVehicles(filters, page, 12);
+  const { vehicles, total, loading, error } = usePublicVehicles(filters, page, 12);
 
-  // Notificações em tempo real para o usuário logado
   useRealtimeBookings(user?.id);
 
   const handleSearch = (e) => {
@@ -36,6 +35,22 @@ export function Home() {
   const handleFilterApply = (newFilters) => {
     setFilters(newFilters);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 p-4">
+        <div className="text-center text-red-600">Erro ao carregar veículos: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -81,7 +96,6 @@ export function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
-        {/* Barra de busca e filtros */}
         <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
           <form onSubmit={handleSearch} className="flex-1 max-w-md">
             <div className="relative">
@@ -98,44 +112,39 @@ export function Home() {
           <SearchFilters filters={filters} onApply={handleFilterApply} />
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="mb-4 text-slate-600">
+          {total} veículo{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+        </div>
+
+        {vehicles.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+            <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
+            <button
+              onClick={() =>
+                handleFilterApply({
+                  search: '',
+                  category: 'all',
+                  city: '',
+                  fuel_type: 'all',
+                  transmission: 'all',
+                  min_price: '',
+                  max_price: '',
+                  seats: '',
+                  orderBy: 'created_at',
+                  orderDir: 'desc',
+                })
+              }
+              className="mt-3 text-blue-600 hover:underline"
+            >
+              Limpar filtros
+            </button>
           </div>
         ) : (
-          <>
-            <div className="mb-4 text-slate-600">
-              {total} veículo{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
-            </div>
-            {vehicles.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-                <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
-                <button
-                  onClick={() => handleFilterApply({
-                    search: '',
-                    category: 'all',
-                    city: '',
-                    fuel_type: 'all',
-                    transmission: 'all',
-                    min_price: '',
-                    max_price: '',
-                    seats: '',
-                    orderBy: 'created_at',
-                    orderDir: 'desc',
-                  })}
-                  className="mt-3 text-blue-600 hover:underline"
-                >
-                  Limpar filtros
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {vehicles.map(vehicle => (
-                  <VehicleCardPublic key={vehicle.id} vehicle={vehicle} />
-                ))}
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {vehicles.map(vehicle => (
+              <VehicleCardPublic key={vehicle.id} vehicle={vehicle} />
+            ))}
+          </div>
         )}
       </main>
     </div>

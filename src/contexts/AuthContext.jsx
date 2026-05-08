@@ -9,53 +9,49 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  async function fetchProfile(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      if (error) {
-        console.error('Erro no fetchProfile:', error);
-        return null;
-      }
-      return data;
-    } catch (err) {
-      console.error('Exceção no fetchProfile:', err);
-      return null;
-    }
-  }
-
   useEffect(() => {
     let isMounted = true;
+    let timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('⚠️ Timeout: forçando loading = false');
+        setLoading(false);
+      }
+    }, 2000); // Força fim do loading após 2s
 
-    const initialize = async () => {
+    const init = async () => {
       try {
+        // Tenta obter sessão
         const { data: { session } } = await supabase.auth.getSession();
         if (!isMounted) return;
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
-          const prof = await fetchProfile(currentUser.id);
-          if (isMounted) setProfile(prof);
+          // Busca perfil (se falhar, apenas loga)
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+          if (error) console.error('Erro ao buscar perfil:', error);
+          if (isMounted) setProfile(data || null);
         }
       } catch (err) {
-        console.error('Erro ao carregar sessão:', err);
+        console.error('Erro na inicialização:', err);
       } finally {
         if (isMounted) setLoading(false);
+        clearTimeout(timeoutId);
       }
     };
 
-    initialize();
+    init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        const prof = await fetchProfile(currentUser.id);
-        if (isMounted) setProfile(prof);
+        const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+        if (isMounted) setProfile(data || null);
       } else {
         if (isMounted) setProfile(null);
       }
@@ -64,11 +60,24 @@ export function AuthProvider({ children }) {
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
 
   const getUserRole = () => profile?.role || 'guest';
+
+  async function updatePixKey(newPixKey) {
+    if (!profile) return false;
+    const { error } = await supabase.from('profiles').update({ pix_key: newPixKey }).eq('id', profile.id);
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
+    setProfile({ ...profile, pix_key: newPixKey });
+    toast.success('Chave Pix atualizada');
+    return true;
+  }
 
   async function signIn(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -77,8 +86,8 @@ export function AuthProvider({ children }) {
       return { data: null, error };
     }
     setUser(data.user);
-    const prof = await fetchProfile(data.user.id);
-    setProfile(prof);
+    const { data: prof } = await supabase.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
+    setProfile(prof || null);
     toast.success(`Bem-vindo, ${data.user.email}`);
     return { data, error: null };
   }
@@ -87,12 +96,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: 'guest',
-        },
-      },
+      options: { data: { full_name: fullName, role: 'guest' } }
     });
     if (error) {
       toast.error(error.message);
@@ -116,6 +120,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    updatePixKey,
     getUserRole,
     isGuest: getUserRole() === 'guest',
     isHost: getUserRole() === 'host',

@@ -7,10 +7,7 @@ export function useBookings() {
 
   const createBooking = useCallback(async (bookingData) => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('bookings')
-      .insert([bookingData])
-      .select();
+    const { data, error } = await supabase.from('bookings').insert([bookingData]).select();
     if (error) {
       toast.error(error.message);
       setLoading(false);
@@ -30,10 +27,9 @@ export function useBookings() {
         .select('*')
         .eq(field, userId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
 
-      const bookingsWithVehicles = await Promise.all(
+      const bookingsWithDetails = await Promise.all(
         data.map(async (booking) => {
           const { data: vehicle } = await supabase
             .from('vehicles')
@@ -45,15 +41,11 @@ export function useBookings() {
             .select('pix_key')
             .eq('id', booking.host_id)
             .single();
-          return {
-            ...booking,
-            vehicles: vehicle,
-            host_pix_key: hostProfile?.pix_key || '',
-          };
+          return { ...booking, vehicles: vehicle, host_pix_key: hostProfile?.pix_key || '' };
         })
       );
       setLoading(false);
-      return bookingsWithVehicles;
+      return bookingsWithDetails;
     } catch (err) {
       console.error(err);
       toast.error('Erro ao carregar reservas');
@@ -64,10 +56,7 @@ export function useBookings() {
 
   const updateBookingStatus = useCallback(async (bookingId, status) => {
     setLoading(true);
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status })
-      .eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ status }).eq('id', bookingId);
     if (error) {
       toast.error(error.message);
       setLoading(false);
@@ -79,10 +68,7 @@ export function useBookings() {
   }, []);
 
   const uploadContract = useCallback(async (bookingId, pdfUrl) => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ contract_pdf_url: pdfUrl })
-      .eq('id', bookingId);
+    const { error } = await supabase.from('bookings').update({ contract_pdf_url: pdfUrl }).eq('id', bookingId);
     if (error) {
       toast.error('Erro ao anexar contrato');
       return false;
@@ -91,11 +77,40 @@ export function useBookings() {
     return true;
   }, []);
 
+  // NOVAS FUNÇÕES PARA PAGAMENTO
+  const uploadPaymentProof = useCallback(async (bookingId, fileUrl) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ payment_proof_url: fileUrl, payment_confirmed: true })
+      .eq('id', bookingId);
+    if (error) {
+      toast.error('Erro ao enviar comprovante');
+      return false;
+    }
+    toast.success('Comprovante enviado! Aguardando confirmação do anfitrião.');
+    return true;
+  }, []);
+
+  const confirmPayment = useCallback(async (bookingId) => {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: 'active', payment_confirmed: true })
+      .eq('id', bookingId);
+    if (error) {
+      toast.error('Erro ao confirmar pagamento');
+      return false;
+    }
+    toast.success('Pagamento confirmado! Reserva ativada.');
+    return true;
+  }, []);
+
   return {
     createBooking,
     fetchUserBookings,
     updateBookingStatus,
     uploadContract,
+    uploadPaymentProof,
+    confirmPayment,
     loading,
   };
 }
