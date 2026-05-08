@@ -13,6 +13,7 @@ export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
     try {
       let query = supabase.from('vehicles').select('*', { count: 'exact' });
 
+      // Filtros
       if (filters.search) query = query.ilike('title', `%${filters.search}%`);
       if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
       if (filters.city) query = query.ilike('location_city', `%${filters.city}%`);
@@ -35,7 +36,7 @@ export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
       setVehicles(data || []);
       setTotal(count || 0);
     } catch (err) {
-      console.error('Erro fetchPublicVehicles:', err);
+      console.error('❌ Erro ao buscar veículos:', err);
       setError(err.message);
     } finally {
       setLoading(false);
