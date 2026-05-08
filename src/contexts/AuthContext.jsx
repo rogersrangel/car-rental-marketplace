@@ -1,103 +1,49 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { createContext, useContext, useState } from 'react';
+import { mockUsers } from '../mocks/data';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
 
-    const init = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-          if (error) console.error('Erro ao buscar perfil:', error);
-          if (isMounted) setProfile(data || null);
-        }
-      } catch (err) {
-        console.error('Erro na inicialização do Auth:', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    init();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!isMounted) return;
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .maybeSingle();
-        if (isMounted) setProfile(data || null);
-      } else {
-        if (isMounted) setProfile(null);
-      }
-      if (isMounted) setLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
+  const updatePixKey = async (newPixKey) => {
+  setProfile(prev => ({ ...prev, pix_key: newPixKey }));
+  toast.success('Chave Pix simulada atualizada!');
+  return true;
+};
   const getUserRole = () => profile?.role || 'guest';
 
-  async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-      return { data: null, error };
+  const signIn = async (email, password) => {
+    setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500)); // simula delay
+    const found = mockUsers.find(u => u.email === email);
+    if (found && password === '123456') {
+      setUser({ email: found.email, user_metadata: { full_name: found.full_name } });
+      setProfile({ role: found.role, full_name: found.full_name });
+      toast.success(`Bem-vindo, ${found.full_name}`);
+      return { data: { user: found }, error: null };
+    } else {
+      toast.error('Credenciais inválidas');
+      return { data: null, error: new Error('Invalid credentials') };
     }
-    setUser(data.user);
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .maybeSingle();
-    setProfile(prof || null);
-    toast.success(`Bem-vindo, ${data.user.email}`);
-    return { data, error: null };
-  }
+  };
 
-  async function signUp(email, password, fullName) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName, role: 'guest' } }
-    });
-    if (error) {
-      toast.error(error.message);
-      return { data: null, error };
-    }
-    toast.success('Cadastro realizado! Verifique seu email.');
-    return { data, error: null };
-  }
+  const signUp = async (email, password, fullName) => {
+    setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.success('Cadastro simulado! Agora faça login.');
+    return { data: { user: { email } }, error: null };
+  };
 
-  async function signOut() {
-    await supabase.auth.signOut();
+  const signOut = () => {
     setUser(null);
     setProfile(null);
-    toast.success('Logout realizado');
-  }
+    toast.success('Logout simulado');
+  };
 
   const value = {
     user,

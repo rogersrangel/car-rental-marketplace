@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { mockVehicles } from '../mocks/data';
 
 export function usePublicVehicles() {
   const [vehicles, setVehicles] = useState([]);
@@ -7,23 +7,13 @@ export function usePublicVehicles() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('vehicles')
-          .select('*')
-          .limit(100);
-        if (error) throw error;
-        setVehicles(data || []);
-      } catch (err) {
-        console.error('Erro ao buscar veículos:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVehicles();
+    // Simula um atraso de rede
+    const timer = setTimeout(() => {
+      setVehicles(mockVehicles);
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
-  return { vehicles, loading, error, refetch: () => window.location.reload() };
+  return { vehicles, loading, error, refetch: () => {} };
 }

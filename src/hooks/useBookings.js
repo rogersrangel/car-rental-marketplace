@@ -1,114 +1,46 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { mockBookings } from '../mocks/data';
 import toast from 'react-hot-toast';
 
 export function useBookings() {
   const [loading, setLoading] = useState(false);
 
-  const createBooking = useCallback(async (bookingData) => {
+  const fetchUserBookings = useCallback(async (userId, role) => {
     setLoading(true);
-    const { data, error } = await supabase.from('bookings').insert([bookingData]).select();
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-      return null;
-    }
-    toast.success('Solicitação de reserva enviada!');
+    await new Promise(resolve => setTimeout(resolve, 500));
     setLoading(false);
-    return data[0];
-  }, []);
-
-  const fetchUserBookings = useCallback(async (userId, role = 'guest') => {
-    setLoading(true);
-    try {
-      const field = role === 'guest' ? 'guest_id' : 'host_id';
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq(field, userId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-
-      const bookingsWithDetails = await Promise.all(
-        data.map(async (booking) => {
-          const { data: vehicle } = await supabase
-            .from('vehicles')
-            .select('*')
-            .eq('id', booking.vehicle_id)
-            .single();
-          const { data: hostProfile } = await supabase
-            .from('profiles')
-            .select('pix_key')
-            .eq('id', booking.host_id)
-            .single();
-          return { ...booking, vehicles: vehicle, host_pix_key: hostProfile?.pix_key || '' };
-        })
-      );
-      setLoading(false);
-      return bookingsWithDetails;
-    } catch (err) {
-      console.error(err);
-      toast.error('Erro ao carregar reservas');
-      setLoading(false);
-      return [];
-    }
+    if (role === 'guest') return mockBookings.filter(b => b.guest_id === userId);
+    if (role === 'host') return mockBookings.filter(b => b.host_id === userId);
+    return [];
   }, []);
 
   const updateBookingStatus = useCallback(async (bookingId, status) => {
     setLoading(true);
-    const { error } = await supabase.from('bookings').update({ status }).eq('id', bookingId);
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-      return false;
-    }
-    toast.success(`Status alterado para ${status}`);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.success(`Status simulado alterado para ${status}`);
     setLoading(false);
     return true;
   }, []);
 
-  const uploadContract = useCallback(async (bookingId, pdfUrl) => {
-    const { error } = await supabase.from('bookings').update({ contract_pdf_url: pdfUrl }).eq('id', bookingId);
-    if (error) {
-      toast.error('Erro ao anexar contrato');
-      return false;
-    }
-    toast.success('Contrato anexado à reserva');
-    return true;
-  }, []);
-
-  // NOVAS FUNÇÕES PARA PAGAMENTO
   const uploadPaymentProof = useCallback(async (bookingId, fileUrl) => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ payment_proof_url: fileUrl, payment_confirmed: true })
-      .eq('id', bookingId);
-    if (error) {
-      toast.error('Erro ao enviar comprovante');
-      return false;
-    }
-    toast.success('Comprovante enviado! Aguardando confirmação do anfitrião.');
+    setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.success('Comprovante simulado enviado');
+    setLoading(false);
     return true;
   }, []);
 
   const confirmPayment = useCallback(async (bookingId) => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: 'active', payment_confirmed: true })
-      .eq('id', bookingId);
-    if (error) {
-      toast.error('Erro ao confirmar pagamento');
-      return false;
-    }
-    toast.success('Pagamento confirmado! Reserva ativada.');
+    setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    toast.success('Pagamento simulado confirmado, reserva ativada');
+    setLoading(false);
     return true;
   }, []);
 
   return {
-    createBooking,
     fetchUserBookings,
     updateBookingStatus,
-    uploadContract,
     uploadPaymentProof,
     confirmPayment,
     loading,

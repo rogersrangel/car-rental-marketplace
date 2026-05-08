@@ -18,7 +18,9 @@ export function Home() {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 p-4">
-        <div className="text-center text-red-600">Erro: {error}</div>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Erro ao carregar veículos:</strong> {error}
+        </div>
       </div>
     );
   }
@@ -66,11 +68,11 @@ export function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {vehicles.map(vehicle => (
+            {vehicles.map((vehicle) => (
               <div key={vehicle.id} className="bg-white rounded-xl shadow p-4">
-                <h3 className="font-bold">{vehicle.title}</h3>
-                <p className="text-blue-600 font-bold">R$ {vehicle.price_per_day}/dia</p>
-                <Link to={`/vehicles/${vehicle.id}`} className="text-sm text-blue-600 mt-2 block">Ver detalhes</Link>
+                <h3 className="font-bold text-lg">{vehicle.title}</h3>
+                <p className="text-blue-600 font-bold text-xl mt-2">R$ {vehicle.price_per_day}<span className="text-sm">/dia</span></p>
+                <Link to={`/vehicles/${vehicle.id}`} className="inline-block mt-3 text-blue-600 hover:underline">Ver detalhes</Link>
               </div>
             ))}
           </div>

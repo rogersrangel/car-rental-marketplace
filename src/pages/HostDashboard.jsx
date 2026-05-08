@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useVehicles } from '../hooks/useVehicles';
@@ -18,24 +18,18 @@ export function HostDashboard() {
   const [completedBookings, setCompletedBookings] = useState(0);
   const [occupancyRate, setOccupancyRate] = useState(0);
 
-  useEffect(() => {
-    if (user && vehicles.length > 0) {
+  // Carrega estatísticas mockadas (opcional)
+  useState(() => {
+    if (user) {
       fetchUserBookings(user.id, 'host').then(bookings => {
         const completed = bookings.filter(b => b.status === 'completed');
         const totalEarned = completed.reduce((sum, b) => sum + b.total_price, 0);
         setCompletedBookings(completed.length);
         setEarnings(totalEarned);
-
-        // Cálculo simplificado (30 dias por veículo)
-        const totalDays = vehicles.reduce((sum, v) => sum + 30, 0);
-        const bookedDays = bookings.reduce((sum, b) => {
-          const days = Math.ceil((new Date(b.end_date) - new Date(b.start_date)) / (1000 * 60 * 60 * 24));
-          return sum + days;
-        }, 0);
-        setOccupancyRate(totalDays ? (bookedDays / totalDays) * 100 : 0);
+        setOccupancyRate(45.5); // mock
       });
     }
-  }, [user, vehicles, fetchUserBookings]);
+  }, [user, fetchUserBookings]);
 
   const handleEdit = (vehicle) => {
     setEditingVehicle(vehicle);
@@ -61,10 +55,7 @@ export function HostDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Carregando veículos...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -80,15 +71,13 @@ export function HostDashboard() {
             <h1 className="text-xl font-bold text-slate-800">Meus Veículos</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">
-              Perfil
-            </Link>
+            <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">Perfil</Link>
             <button
               onClick={() => {
                 setEditingVehicle(null);
                 setShowForm(true);
               }}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" /> Adicionar Veículo
             </button>
@@ -122,32 +111,20 @@ export function HostDashboard() {
           </div>
         </div>
 
-        {vehicles.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16 bg-white rounded-lg border border-slate-200"
-          >
+        {vehicles.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
             <p className="text-slate-500">Nenhum veículo cadastrado ainda.</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-4 text-blue-600 hover:underline font-medium"
-            >
+            <button onClick={() => setShowForm(true)} className="mt-4 text-blue-600 hover:underline">
               Adicionar primeiro veículo
             </button>
-          </motion.div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map(vehicle => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} onEdit={handleEdit} onDelete={handleDelete} />
+            ))}
+          </div>
         )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
       </main>
 
       {showForm && (
