@@ -1,51 +1,29 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
+export function usePublicVehicles() {
   const [vehicles, setVehicles] = useState([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchVehicles = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      let query = supabase.from('vehicles').select('*', { count: 'exact' });
-
-      // Filtros
-      if (filters.search) query = query.ilike('title', `%${filters.search}%`);
-      if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category);
-      if (filters.city) query = query.ilike('location_city', `%${filters.city}%`);
-      if (filters.fuel_type && filters.fuel_type !== 'all') query = query.eq('fuel_type', filters.fuel_type);
-      if (filters.transmission && filters.transmission !== 'all') query = query.eq('transmission', filters.transmission);
-      if (filters.min_price) query = query.gte('price_per_day', parseFloat(filters.min_price));
-      if (filters.max_price) query = query.lte('price_per_day', parseFloat(filters.max_price));
-      if (filters.seats) query = query.gte('seats', parseInt(filters.seats));
-
-      const orderBy = filters.orderBy || 'created_at';
-      const orderDir = filters.orderDir === 'asc';
-      query = query.order(orderBy, { ascending: orderDir });
-
-      const from = (page - 1) * limit;
-      query = query.range(from, from + limit - 1);
-
-      const { data, error, count } = await query;
-      if (error) throw error;
-
-      setVehicles(data || []);
-      setTotal(count || 0);
-    } catch (err) {
-      console.error('❌ Erro ao buscar veículos:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, page, limit]);
-
   useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('vehicles')
+          .select('*')
+          .limit(100);
+        if (error) throw error;
+        setVehicles(data || []);
+      } catch (err) {
+        console.error('Erro ao buscar veículos:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchVehicles();
-  }, [fetchVehicles]);
+  }, []);
 
-  return { vehicles, total, loading, error, refetch: fetchVehicles };
+  return { vehicles, loading, error, refetch: () => window.location.reload() };
 }

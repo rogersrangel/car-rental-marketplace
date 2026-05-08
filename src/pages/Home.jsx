@@ -1,37 +1,11 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePublicVehicles } from '../hooks/usePublicVehicles';
-import { SearchFilters } from '../components/SearchFilters';
-import { VehicleCardPublic } from '../components/VehicleCardPublic';
-import { Search, Car, LogOut, LogIn } from 'lucide-react';
+import { Car, LogOut, LogIn } from 'lucide-react';
 
 export function Home() {
   const { user, signOut, getUserRole } = useAuth();
-  const [filters, setFilters] = useState({
-    search: '',
-    category: 'all',
-    city: '',
-    fuel_type: 'all',
-    transmission: 'all',
-    min_price: '',
-    max_price: '',
-    seats: '',
-    orderBy: 'created_at',
-    orderDir: 'desc',
-  });
-  const [page] = useState(1);
-  const { vehicles, total, loading, error } = usePublicVehicles(filters, page, 12);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    setFilters(prev => ({ ...prev, search: formData.get('search') || '' }));
-  };
-
-  const handleFilterApply = (newFilters) => {
-    setFilters(newFilters);
-  };
+  const { vehicles, loading, error } = usePublicVehicles();
 
   if (loading) {
     return (
@@ -44,9 +18,7 @@ export function Home() {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 p-4">
-        <div className="text-center text-red-600">
-          Erro ao carregar veículos: {error}
-        </div>
+        <div className="text-center text-red-600">Erro: {error}</div>
       </div>
     );
   }
@@ -65,22 +37,14 @@ export function Home() {
                 <span className="text-sm text-slate-600">
                   {user?.user_metadata?.full_name || user?.email} ({getUserRole()})
                 </span>
-                <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">
-                  Perfil
-                </Link>
+                <Link to="/profile" className="text-sm text-slate-600 hover:text-slate-800">Perfil</Link>
                 {getUserRole() === 'host' && (
-                  <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">
-                    Meus Veículos
-                  </Link>
+                  <Link to="/dashboard/host" className="text-sm text-blue-600 hover:underline">Meus Veículos</Link>
                 )}
                 {getUserRole() === 'admin' && (
-                  <Link to="/admin" className="text-sm text-purple-600 hover:underline">
-                    Admin
-                  </Link>
+                  <Link to="/admin" className="text-sm text-purple-600 hover:underline">Admin</Link>
                 )}
-                <Link to="/reservations" className="text-sm text-blue-600 hover:underline">
-                  Minhas Reservas
-                </Link>
+                <Link to="/reservations" className="text-sm text-blue-600 hover:underline">Minhas Reservas</Link>
                 <button onClick={signOut} className="flex items-center gap-1 text-red-600 hover:text-red-700">
                   <LogOut className="w-4 h-4" /> Sair
                 </button>
@@ -95,53 +59,19 @@ export function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
-        <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
-          <form onSubmit={handleSearch} className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                name="search"
-                defaultValue={filters.search}
-                placeholder="Buscar veículos por nome..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </form>
-          <SearchFilters filters={filters} onApply={handleFilterApply} />
-        </div>
-
-        <div className="mb-4 text-slate-600">
-          {total} veículo{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
-        </div>
-
+        <h2 className="text-2xl font-bold mb-4">Veículos disponíveis</h2>
         {vehicles.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-            <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
-            <button
-              onClick={() =>
-                handleFilterApply({
-                  search: '',
-                  category: 'all',
-                  city: '',
-                  fuel_type: 'all',
-                  transmission: 'all',
-                  min_price: '',
-                  max_price: '',
-                  seats: '',
-                  orderBy: 'created_at',
-                  orderDir: 'desc',
-                })
-              }
-              className="mt-3 text-blue-600 hover:underline"
-            >
-              Limpar filtros
-            </button>
+            <p className="text-slate-500">Nenhum veículo cadastrado ainda.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {vehicles.map(vehicle => (
-              <VehicleCardPublic key={vehicle.id} vehicle={vehicle} />
+              <div key={vehicle.id} className="bg-white rounded-xl shadow p-4">
+                <h3 className="font-bold">{vehicle.title}</h3>
+                <p className="text-blue-600 font-bold">R$ {vehicle.price_per_day}/dia</p>
+                <Link to={`/vehicles/${vehicle.id}`} className="text-sm text-blue-600 mt-2 block">Ver detalhes</Link>
+              </div>
             ))}
           </div>
         )}
