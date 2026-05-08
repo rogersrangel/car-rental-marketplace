@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { mockVehicles } from '../mocks/data';
-import { ArrowLeft, Car, Bike, MapPin, Fuel, Gauge } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Gauge, Fuel, Users, Calendar } from 'lucide-react';
 
 export function VehicleDetail() {
   const { id } = useParams();
@@ -10,42 +10,44 @@ export function VehicleDetail() {
 
   useEffect(() => {
     const found = mockVehicles.find(v => v.id === id);
-    setTimeout(() => {
-      setVehicle(found || null);
-      setLoading(false);
-    }, 500);
+    setTimeout(() => { setVehicle(found); setLoading(false); }, 400);
   }, [id]);
 
-  if (loading) return <div className="p-8 text-center">Carregando detalhes...</div>;
-  if (!vehicle) return <div className="p-8 text-center">Veículo não encontrado.</div>;
-
-  const getFuelText = (fuel) => ({
-    gasoline: 'Gasolina', ethanol: 'Etanol', diesel: 'Diesel', electric: 'Elétrico'
-  }[fuel] || fuel);
+  if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+  if (!vehicle) return <div className="text-center py-12">Veículo não encontrado</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center gap-2 text-slate-600 mb-4"><ArrowLeft className="w-4 h-4" /> Voltar</Link>
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          {vehicle.images?.[0] && <img src={vehicle.images[0]} alt={vehicle.title} className="w-full h-96 object-cover" />}
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">{vehicle.title}</h1>
-            <p className="text-slate-600 mt-2">{vehicle.description}</p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div className="flex gap-2"><Car className="w-5 h-5" /> {vehicle.category === 'car' ? 'Carro' : 'Moto'}</div>
-              <div className="flex gap-2"><Fuel className="w-5 h-5" /> {getFuelText(vehicle.fuel_type)}</div>
-              <div className="flex gap-2"><Gauge className="w-5 h-5" /> {vehicle.transmission === 'automatic' ? 'Automático' : 'Manual'}</div>
-              <div className="flex gap-2"><MapPin className="w-5 h-5" /> {vehicle.location_city}/{vehicle.location_state}</div>
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-100 p-4">
+        <Link to="/" className="inline-flex items-center gap-2 text-slate-600"><ArrowLeft className="w-5 h-5" /> Voltar</Link>
+      </header>
+      <main className="max-w-6xl mx-auto p-4">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Imagem principal */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-md">
+            <img src={vehicle.images?.[0] || '/placeholder.jpg'} alt={vehicle.title} className="w-full h-96 object-cover" />
+          </div>
+          {/* Informações */}
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800">{vehicle.title}</h1>
+            <div className="flex items-center gap-2 mt-2">
+              <div className="flex text-yellow-400"><Star className="w-5 h-5 fill-yellow-400" /><Star className="w-5 h-5 fill-yellow-400" /><Star className="w-5 h-5 fill-yellow-400" /><Star className="w-5 h-5 fill-yellow-400" /><Star className="w-5 h-5 fill-yellow-400" /></div>
+              <span className="text-slate-500">(48 avaliações)</span>
             </div>
-            <div className="mt-6 border-t pt-4 flex justify-between items-center">
-              <span className="text-3xl font-bold text-blue-600">R$ {vehicle.price_per_day}<span className="text-sm">/dia</span></span>
-              {/* Botão de reserva fictício */}
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Reservar (simulação)</button>
+            <p className="text-slate-600 mt-4">{vehicle.description}</p>
+            <div className="grid grid-cols-2 gap-4 mt-6 p-4 bg-slate-100 rounded-xl">
+              <div className="flex items-center gap-2"><Gauge className="w-5 h-5 text-primary-600" /> <span>Automático</span></div>
+              <div className="flex items-center gap-2"><Fuel className="w-5 h-5 text-primary-600" /> <span>Gasolina</span></div>
+              <div className="flex items-center gap-2"><Users className="w-5 h-5 text-primary-600" /> <span>{vehicle.seats} lugares</span></div>
+              <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary-600" /> <span>{vehicle.location_city}, {vehicle.location_state}</span></div>
+            </div>
+            <div className="mt-6 flex justify-between items-center border-t border-slate-200 pt-6">
+              <div><span className="text-2xl font-bold text-primary-600">R$ {vehicle.price_per_day}</span><span className="text-slate-500">/dia</span></div>
+              <button className="bg-primary-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-primary-700 transition">Reservar agora</button>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
