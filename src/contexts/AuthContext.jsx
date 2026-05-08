@@ -6,28 +6,24 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-
-  const updatePixKey = async (newPixKey) => {
-  setProfile(prev => ({ ...prev, pix_key: newPixKey }));
-  toast.success('Chave Pix simulada atualizada!');
-  return true;
-};
   const getUserRole = () => profile?.role || 'guest';
 
   const signIn = async (email, password) => {
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500)); // simula delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     const found = mockUsers.find(u => u.email === email);
     if (found && password === '123456') {
-      setUser({ email: found.email, user_metadata: { full_name: found.full_name } });
-      setProfile({ role: found.role, full_name: found.full_name });
+      setUser({ email: found.email, user_metadata: { full_name: found.full_name }, id: found.id });
+      setProfile({ role: found.role, full_name: found.full_name, pix_key: found.pix_key || '', id: found.id });
       toast.success(`Bem-vindo, ${found.full_name}`);
+      setLoading(false);
       return { data: { user: found }, error: null };
     } else {
       toast.error('Credenciais inválidas');
+      setLoading(false);
       return { data: null, error: new Error('Invalid credentials') };
     }
   };
@@ -36,6 +32,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));
     toast.success('Cadastro simulado! Agora faça login.');
+    setLoading(false);
     return { data: { user: { email } }, error: null };
   };
 
@@ -45,6 +42,13 @@ export function AuthProvider({ children }) {
     toast.success('Logout simulado');
   };
 
+  const updatePixKey = async (newPixKey) => {
+    if (!profile) return false;
+    setProfile(prev => ({ ...prev, pix_key: newPixKey }));
+    toast.success('Chave Pix simulada atualizada!');
+    return true;
+  };
+
   const value = {
     user,
     profile,
@@ -52,6 +56,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    updatePixKey,
     getUserRole,
     isGuest: getUserRole() === 'guest',
     isHost: getUserRole() === 'host',

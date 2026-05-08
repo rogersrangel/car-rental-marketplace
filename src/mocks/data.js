@@ -1,8 +1,7 @@
-// src/mocks/data.js
 export const mockUsers = [
-  { id: '1', email: 'guest@example.com', role: 'guest', full_name: 'Usuário Convidado', pix_key: '' },
-  { id: '2', email: 'host@example.com', role: 'host', full_name: 'Anfitrião Exemplo', pix_key: 'host@example.com' },
-  { id: '3', email: 'admin@example.com', role: 'admin', full_name: 'Administrador', pix_key: '' },
+  { id: '1', email: 'guest@example.com', role: 'guest', full_name: 'Convidado', pix_key: '' },
+  { id: '2', email: 'host@example.com', role: 'host', full_name: 'Anfitrião', pix_key: 'host@example.com' },
+  { id: '3', email: 'admin@example.com', role: 'admin', full_name: 'Admin', pix_key: '' },
 ];
 
 const updatePixKey = async (newPixKey) => {

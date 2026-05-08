@@ -8,7 +8,6 @@ export function useVehicles(ownerId) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simula carregamento e filtra pelos veículos do proprietário
     const timer = setTimeout(() => {
       const filtered = mockVehicles.filter(v => v.owner_id === ownerId);
       setVehicles(filtered);
@@ -17,20 +16,12 @@ export function useVehicles(ownerId) {
     return () => clearTimeout(timer);
   }, [ownerId]);
 
-  const createVehicle = async (vehicleData) => {
+  const createVehicle = async (data) => {
     toast.success('Veículo simulado cadastrado!');
-    return { ...vehicleData, id: `v${Date.now()}` };
+    return { ...data, id: `v${Date.now()}` };
   };
-
-  const updateVehicle = async (id, updates) => {
-    toast.success('Veículo simulado atualizado!');
-    return true;
-  };
-
-  const deleteVehicle = async (id) => {
-    toast.success('Veículo simulado removido!');
-    return true;
-  };
+  const updateVehicle = async () => { toast.success('Atualizado!'); return true; };
+  const deleteVehicle = async () => { toast.success('Removido!'); return true; };
 
   return { vehicles, loading, error, createVehicle, updateVehicle, deleteVehicle, refetch: () => {} };
 }
