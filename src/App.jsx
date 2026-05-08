@@ -19,10 +19,38 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
-          <Route path="/reservations" element={<PrivateRoute><MyReservations /></PrivateRoute>} />
-          <Route path="/dashboard/host" element={<PrivateRoute requiredRole="host"><HostDashboard /></PrivateRoute>} />
-          <Route path="/admin" element={<PrivateRoute requiredRole="admin"><AdminDashboard /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route
+            path="/reservations"
+            element={
+              <PrivateRoute>
+                <MyReservations />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/host"
+            element={
+              <PrivateRoute requiredRole="host">
+                <HostDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute requiredRole="admin">
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

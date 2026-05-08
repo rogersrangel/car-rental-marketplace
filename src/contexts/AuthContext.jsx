@@ -11,19 +11,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId;
 
     const init = async () => {
       try {
-        // Timeout para não travar para sempre
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Timeout ao buscar sessão')), 5000);
-        });
-
-        const sessionPromise = supabase.auth.getSession();
-        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
-        clearTimeout(timeoutId);
-
+        const { data: { session } } = await supabase.auth.getSession();
         if (!isMounted) return;
         const currentUser = session?.user ?? null;
         setUser(currentUser);
@@ -38,7 +29,6 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         console.error('Erro na inicialização do Auth:', err);
-        toast.error('Erro de conexão. Recarregue a página.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -65,7 +55,6 @@ export function AuthProvider({ children }) {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);

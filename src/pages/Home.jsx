@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePublicVehicles } from '../hooks/usePublicVehicles';
-import { useRealtimeBookings } from '../hooks/useRealtimeBookings';
 import { SearchFilters } from '../components/SearchFilters';
 import { VehicleCardPublic } from '../components/VehicleCardPublic';
 import { Search, Car, LogOut, LogIn } from 'lucide-react';
@@ -23,8 +22,6 @@ export function Home() {
   });
   const [page] = useState(1);
   const { vehicles, total, loading, error } = usePublicVehicles(filters, page, 12);
-
-  useRealtimeBookings(user?.id);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -122,18 +119,20 @@ export function Home() {
           <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
             <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
             <button
-              onClick={() => handleFilterApply({
-                search: '',
-                category: 'all',
-                city: '',
-                fuel_type: 'all',
-                transmission: 'all',
-                min_price: '',
-                max_price: '',
-                seats: '',
-                orderBy: 'created_at',
-                orderDir: 'desc',
-              })}
+              onClick={() =>
+                handleFilterApply({
+                  search: '',
+                  category: 'all',
+                  city: '',
+                  fuel_type: 'all',
+                  transmission: 'all',
+                  min_price: '',
+                  max_price: '',
+                  seats: '',
+                  orderBy: 'created_at',
+                  orderDir: 'desc',
+                })
+              }
               className="mt-3 text-blue-600 hover:underline"
             >
               Limpar filtros
