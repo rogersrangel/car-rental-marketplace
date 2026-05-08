@@ -47,7 +47,9 @@ export function Home() {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 p-4">
-        <div className="text-center text-red-600">Erro ao carregar veículos: {error}</div>
+        <div className="text-center text-red-600">
+          Erro ao carregar veículos: {error}
+        </div>
       </div>
     );
   }
@@ -120,20 +122,18 @@ export function Home() {
           <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
             <p className="text-slate-500">Nenhum veículo encontrado com os filtros atuais.</p>
             <button
-              onClick={() =>
-                handleFilterApply({
-                  search: '',
-                  category: 'all',
-                  city: '',
-                  fuel_type: 'all',
-                  transmission: 'all',
-                  min_price: '',
-                  max_price: '',
-                  seats: '',
-                  orderBy: 'created_at',
-                  orderDir: 'desc',
-                })
-              }
+              onClick={() => handleFilterApply({
+                search: '',
+                category: 'all',
+                city: '',
+                fuel_type: 'all',
+                transmission: 'all',
+                min_price: '',
+                max_price: '',
+                seats: '',
+                orderBy: 'created_at',
+                orderDir: 'desc',
+              })}
               className="mt-3 text-blue-600 hover:underline"
             >
               Limpar filtros

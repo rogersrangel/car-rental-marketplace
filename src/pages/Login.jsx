@@ -7,7 +7,7 @@ import { Mail, Lock, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().email('E-mail inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
 });
 
@@ -42,7 +42,9 @@ export function Login() {
     const result = schema.safeParse(form);
     if (!result.success) {
       const fieldErrors = {};
-      result.error.errors.forEach(err => { fieldErrors[err.path[0]] = err.message; });
+      result.error.errors.forEach(err => {
+        fieldErrors[err.path[0]] = err.message;
+      });
       setErrors(fieldErrors);
       return;
     }
@@ -60,7 +62,6 @@ export function Login() {
     setLoading(false);
   };
 
-  // (o JSX permanece o mesmo, sem alterações)
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <motion.div
@@ -76,8 +77,13 @@ export function Login() {
             <div>
               <div className="relative">
                 <User className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-                <input name="fullName" placeholder="Nome completo" value={form.fullName} onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                <input
+                  name="fullName"
+                  placeholder="Nome completo"
+                  value={form.fullName}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
             </div>
@@ -85,16 +91,28 @@ export function Login() {
           <div>
             <div className="relative">
               <Mail className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-              <input name="email" type="email" placeholder="E-mail" value={form.email} onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              <input
+                name="email"
+                type="email"
+                placeholder="E-mail"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
           <div>
             <div className="relative">
               <Lock className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-              <input name="password" type="password" placeholder="Senha" value={form.password} onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg" />
+              <input
+                name="password"
+                type="password"
+                placeholder="Senha"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg"
+              />
             </div>
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
@@ -102,19 +120,32 @@ export function Login() {
             <div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-                <input name="confirmPassword" type="password" placeholder="Confirmar senha" value={form.confirmPassword} onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg" />
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirmar senha"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg"
+                />
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
           )}
-          <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+          >
             {loading ? 'Aguarde...' : (isRegister ? 'Cadastrar' : 'Entrar')}
           </button>
         </form>
         <p className="text-center text-slate-600 mt-4">
           {isRegister ? 'Já tem conta?' : 'Não tem conta?'}{' '}
-          <button onClick={() => setIsRegister(!isRegister)} className="text-blue-600 hover:underline">
+          <button
+            onClick={() => setIsRegister(!isRegister)}
+            className="text-blue-600 hover:underline"
+          >
             {isRegister ? 'Faça login' : 'Cadastre-se'}
           </button>
         </p>

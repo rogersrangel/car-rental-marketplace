@@ -29,10 +29,10 @@ export function usePublicVehicles(filters = {}, page = 1, limit = 12) {
       const from = (page - 1) * limit;
       query = query.range(from, from + limit - 1);
 
-      // Timeout de 5 segundos para evitar loading infinito
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout ao carregar veículos')), 5000)
-      );
+      // Timeout para evitar travamento
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout ao buscar veículos')), 7000);
+      });
 
       const result = await Promise.race([query, timeoutPromise]);
       const { data, error, count } = result;
