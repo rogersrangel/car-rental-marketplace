@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function VehicleCardPublic({ vehicle }) {
@@ -11,19 +11,19 @@ export function VehicleCardPublic({ vehicle }) {
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -6 }}
-      transition={{ duration: 0.2 }}
       className="group bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-lg border border-white/10 overflow-hidden cursor-pointer hover:border-blue-500/50 transition-all"
     >
       <Link to={`/vehicles/${vehicle.id}`}>
         <div className="relative h-48 overflow-hidden bg-slate-700">
-          <img
-            src={mainImage}
-            alt={vehicle.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <img src={mainImage} alt={vehicle.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {avgRating}
           </div>
+          {vehicle.owner_verified && (
+            <div className="absolute bottom-3 left-3 bg-blue-600/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" /> Verificado
+            </div>
+          )}
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start mb-1">

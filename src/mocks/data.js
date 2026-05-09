@@ -1,14 +1,55 @@
 // src/mocks/data.js
 export const mockUsers = [
-  { id: '1', email: 'guest@example.com', role: 'guest', full_name: 'Convidado', pix_key: '' },
-  { id: '2', email: 'host@example.com', role: 'host', full_name: 'Anfitrião', pix_key: 'host@example.com' },
-  { id: '3', email: 'admin@example.com', role: 'admin', full_name: 'Admin', pix_key: '' },
+  {
+    id: '1',
+    email: 'guest@example.com',
+    role: 'guest',
+    full_name: 'Convidado Silva',
+    pix_key: '',
+    cpf: '123.456.789-00',
+    cnh: '12345678900',
+    bio: 'Usuário que adora viajar e alugar carros incríveis.',
+    avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+    is_verified: false,
+    avg_rating_as_host: 0,
+    avg_rating_as_guest: 4.5,
+  },
+  {
+    id: '2',
+    email: 'host@example.com',
+    role: 'host',
+    full_name: 'Anfitrião Oliveira',
+    pix_key: 'host@example.com',
+    cpf: '987.654.321-00',
+    cnh: '98765432100',
+    bio: 'Ofereço meus veículos com todo cuidado e transparência.',
+    avatar_url: 'https://randomuser.me/api/portraits/women/2.jpg',
+    is_verified: true,
+    avg_rating_as_host: 4.8,
+    avg_rating_as_guest: 0,
+  },
+  {
+    id: '3',
+    email: 'admin@example.com',
+    role: 'admin',
+    full_name: 'Admin Souza',
+    pix_key: '',
+    cpf: '111.222.333-44',
+    cnh: '11122233344',
+    bio: 'Administrador da plataforma.',
+    avatar_url: 'https://randomuser.me/api/portraits/men/3.jpg',
+    is_verified: true,
+    avg_rating_as_host: 0,
+    avg_rating_as_guest: 0,
+  },
 ];
+
 
 export const mockVehicles = [
   {
     id: 'v1',
     owner_id: '2',
+    owner_verified: true,
     title: 'Honda Civic 2022',
     description: 'Carro completo, ar condicionado, câmbio automático, vidros elétricos.',
     category: 'car',
@@ -21,6 +62,8 @@ export const mockVehicles = [
     location_state: 'SP',
     location_full: 'Av. Paulista, 1000, São Paulo, SP',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Honda+Civic'],
+    avg_rating: 4.7,
+    total_reviews: 12,
     specs: {
       power: '158 hp',
       mileage: '25,000 km',
@@ -35,6 +78,7 @@ export const mockVehicles = [
   {
     id: 'v2',
     owner_id: '2',
+    owner_verified: true,
     title: 'Yamaha MT-07',
     description: 'Moto 700cc, ágil e econômica, perfeita para a cidade.',
     category: 'motorcycle',
@@ -47,6 +91,8 @@ export const mockVehicles = [
     location_state: 'RJ',
     location_full: 'Copacabana, Rio de Janeiro, RJ',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Yamaha+MT-07'],
+    avg_rating: 4.9,
+    total_reviews: 8,
     specs: {
       power: '73 hp',
       mileage: '12,000 km',
@@ -61,6 +107,7 @@ export const mockVehicles = [
   {
     id: 'v3',
     owner_id: '2',
+    owner_verified: true,
     title: 'Jeep Compass 2023',
     description: 'SUV robusto, ideal para estradas e terrenos irregulares.',
     category: 'car',
@@ -73,6 +120,8 @@ export const mockVehicles = [
     location_state: 'MG',
     location_full: 'Savassi, Belo Horizonte, MG',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Jeep+Compass'],
+    avg_rating: 4.6,
+    total_reviews: 7,
     specs: {
       power: '170 hp',
       mileage: '8,000 km',
@@ -87,6 +136,7 @@ export const mockVehicles = [
   {
     id: 'v4',
     owner_id: '2',
+    owner_verified: true,
     title: 'Batmobile Tumbler',
     subtitle: 'Urban Tactical Edition',
     description: 'O veículo mais icônico de Gotham, agora disponível para aluguel. Equipado com tecnologia militar e design agressivo.',
@@ -103,6 +153,8 @@ export const mockVehicles = [
       'https://images.unsplash.com/photo-1552519507-88aa2df4cb6d?w=800',
       'https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800',
     ],
+    avg_rating: 5.0,
+    total_reviews: 9,
     specs: {
       power: '800 hp',
       mileage: '26,793 km',
@@ -125,12 +177,15 @@ export const mockBookings = [
     start_date: '2026-05-10T10:00:00Z',
     end_date: '2026-05-12T10:00:00Z',
     total_price: 300,
-    status: 'approved',
-    payment_confirmed: false,
-    contract_pdf_url: null,
-    payment_proof_url: null,
+    status: 'completed',
+    payment_confirmed: true,
+    contract_pdf_url: '#',
+    payment_proof_url: '#',
     vehicles: mockVehicles[0],
     host_pix_key: 'host@example.com',
+    guest_rated_host: false,
+    guest_rated_vehicle: false,
+    host_rated_guest: false,
   },
   {
     id: 'b2',
@@ -146,6 +201,9 @@ export const mockBookings = [
     payment_proof_url: '#',
     vehicles: mockVehicles[1],
     host_pix_key: 'host@example.com',
+    guest_rated_host: true,
+    guest_rated_vehicle: true,
+    host_rated_guest: true,
   },
 ];
 
@@ -157,6 +215,28 @@ export const mockReviews = [
     reviewee_id: '2',
     rating: 5,
     comment: 'Excelente experiência, moto em perfeito estado!',
+    type: 'host', // avaliando o anfitrião
+    created_at: '2026-05-18T10:00:00Z',
+  },
+  {
+    id: 'r2',
+    booking_id: 'b2',
+    reviewer_id: '1',
+    reviewee_id: 'v2', // avaliando o veículo
+    rating: 5,
+    comment: 'Moto muito econômica e divertida.',
+    type: 'vehicle',
+    created_at: '2026-05-18T10:00:00Z',
+  },
+  {
+    id: 'r3',
+    booking_id: 'b2',
+    reviewer_id: '2',
+    reviewee_id: '1',
+    rating: 4,
+    comment: 'Hóspede pontual e respeitou o veículo.',
+    type: 'guest',
+    created_at: '2026-05-18T10:00:00Z',
   },
 ];
 
