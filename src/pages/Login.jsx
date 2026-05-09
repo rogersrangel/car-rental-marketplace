@@ -42,9 +42,7 @@ export function Login() {
     const result = schema.safeParse(form);
     if (!result.success) {
       const fieldErrors = {};
-      result.error.errors.forEach(err => {
-        fieldErrors[err.path[0]] = err.message;
-      });
+      result.error.errors.forEach(err => { fieldErrors[err.path[0]] = err.message; });
       setErrors(fieldErrors);
       return;
     }
@@ -63,89 +61,86 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-md p-8 w-full max-w-md border border-slate-200"
+        className="bg-slate-800/50 backdrop-blur-md rounded-2xl shadow-2xl p-8 w-full max-w-md border border-white/10"
       >
-        <h2 className="text-3xl font-bold text-center text-slate-800 mb-6">
+        <h2 className="text-3xl font-bold text-center text-white mb-6">
           {isRegister ? 'Criar Conta' : 'Entrar'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegister && (
             <div>
               <div className="relative">
-                <User className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   name="fullName"
                   placeholder="Nome completo"
                   value={form.fullName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+              {errors.fullName && <p className="text-red-400 text-sm mt-1">{errors.fullName}</p>}
             </div>
           )}
           <div>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 name="email"
                 type="email"
                 placeholder="E-mail"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
           </div>
           <div>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 name="password"
                 type="password"
                 placeholder="Senha"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
           </div>
           {isRegister && (
             <div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   name="confirmPassword"
                   type="password"
                   placeholder="Confirmar senha"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-white/20 rounded-xl"
                 />
               </div>
-              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 disabled:opacity-50"
           >
             {loading ? 'Aguarde...' : (isRegister ? 'Cadastrar' : 'Entrar')}
           </button>
         </form>
-        <p className="text-center text-slate-600 mt-4">
+        <p className="text-center text-slate-400 mt-4">
           {isRegister ? 'Já tem conta?' : 'Não tem conta?'}{' '}
-          <button
-            onClick={() => setIsRegister(!isRegister)}
-            className="text-blue-600 hover:underline"
-          >
+          <button onClick={() => setIsRegister(!isRegister)} className="text-blue-400 hover:underline">
             {isRegister ? 'Faça login' : 'Cadastre-se'}
           </button>
         </p>

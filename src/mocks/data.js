@@ -1,14 +1,9 @@
+// src/mocks/data.js
 export const mockUsers = [
   { id: '1', email: 'guest@example.com', role: 'guest', full_name: 'Convidado', pix_key: '' },
   { id: '2', email: 'host@example.com', role: 'host', full_name: 'Anfitrião', pix_key: 'host@example.com' },
   { id: '3', email: 'admin@example.com', role: 'admin', full_name: 'Admin', pix_key: '' },
 ];
-
-const updatePixKey = async (newPixKey) => {
-  setProfile(prev => ({ ...prev, pix_key: newPixKey }));
-  toast.success('Chave Pix simulada atualizada!');
-  return true;
-};
 
 export const mockVehicles = [
   {
@@ -24,7 +19,16 @@ export const mockVehicles = [
     price_per_day: 150,
     location_city: 'São Paulo',
     location_state: 'SP',
+    location_full: 'Av. Paulista, 1000, São Paulo, SP',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Honda+Civic'],
+    specs: {
+      power: '158 hp',
+      mileage: '25,000 km',
+      engine: '1.5 Turbo',
+      acceleration: '0-100 km/h em 8.2s',
+      top_speed: '210 km/h',
+      fuel_consumption: '12 km/l (estrada)',
+    },
     status: 'active',
     created_at: '2026-01-01T00:00:00Z',
   },
@@ -41,7 +45,16 @@ export const mockVehicles = [
     price_per_day: 90,
     location_city: 'Rio de Janeiro',
     location_state: 'RJ',
+    location_full: 'Copacabana, Rio de Janeiro, RJ',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Yamaha+MT-07'],
+    specs: {
+      power: '73 hp',
+      mileage: '12,000 km',
+      engine: '689cc twin',
+      acceleration: '0-100 km/h em 3.5s',
+      top_speed: '220 km/h',
+      fuel_consumption: '20 km/l',
+    },
     status: 'active',
     created_at: '2026-01-15T00:00:00Z',
   },
@@ -58,9 +71,48 @@ export const mockVehicles = [
     price_per_day: 220,
     location_city: 'Belo Horizonte',
     location_state: 'MG',
+    location_full: 'Savassi, Belo Horizonte, MG',
     images: ['https://placehold.co/600x400/e2e8f0/64748b?text=Jeep+Compass'],
+    specs: {
+      power: '170 hp',
+      mileage: '8,000 km',
+      engine: '2.0 Diesel',
+      acceleration: '0-100 km/h em 10.5s',
+      top_speed: '190 km/h',
+      fuel_consumption: '14 km/l (estrada)',
+    },
     status: 'active',
     created_at: '2026-02-10T00:00:00Z',
+  },
+  {
+    id: 'v4',
+    owner_id: '2',
+    title: 'Batmobile Tumbler',
+    subtitle: 'Urban Tactical Edition',
+    description: 'O veículo mais icônico de Gotham, agora disponível para aluguel. Equipado com tecnologia militar e design agressivo.',
+    category: 'car',
+    subcategory: 'Supercar',
+    seats: 2,
+    fuel_type: 'jet fuel',
+    transmission: 'automatic',
+    price_per_day: 187500,
+    location_city: 'Gotham',
+    location_state: 'NJ',
+    location_full: 'Batcave, Wayne Manor, Gotham City, NJ',
+    images: [
+      'https://images.unsplash.com/photo-1552519507-88aa2df4cb6d?w=800',
+      'https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800',
+    ],
+    specs: {
+      power: '800 hp',
+      mileage: '26,793 km',
+      engine: 'V8 auxiliary jet',
+      acceleration: '0-100 km/h em 3.2s',
+      top_speed: '450 km/h',
+      fuel_consumption: '5 km/l (estimado)',
+    },
+    status: 'active',
+    created_at: '2026-03-01T00:00:00Z',
   },
 ];
 
@@ -108,7 +160,7 @@ export const mockReviews = [
   },
 ];
 
-// Para o dashboard do anfitrião (estatísticas)
-export const mockEarnings = 480; // soma de b1 + b2
+// Estatísticas para dashboards (mock)
+export const mockEarnings = 480;        // soma de b1 + b2
 export const mockCompletedBookings = 1; // apenas b2
-export const mockOccupancyRate = 45.5; // exemplo
+export const mockOccupancyRate = 45.5;  // exemplo
